@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Printer, AlertTriangle, Clock, Phone, Mail, MapPin, Globe, User } from 'lucide-react'
 import type { Organization, Quote } from '@/types/database'
-import { deriveQuoteStatus, formatCurrency, formatDate, formatQuantity } from '@/lib/utils'
+import { deriveQuoteStatus, formatCurrency, formatDate, formatQuantity, parseStoreAddress } from '@/lib/utils'
 
 interface QuotePrintableDocProps {
   quote: Quote
@@ -32,12 +32,12 @@ export function QuotePrintableDoc({ quote, organization, previewMode = false }: 
 
   const items = [...(quote.items ?? [])].sort((a, b) => a.position - b.position)
 
-  // Snapshots e perfil do vendedor
-  const sellerName = quote.seller_name_snapshot || quote.seller?.full_name || null
-  const sellerPhone = quote.seller_phone_snapshot || quote.seller?.phone || null
-  const sellerEmail = quote.seller?.email || null
+  // Snapshots e perfil do vendedor (1ª coluna)
+  const sellerName = quote.seller_name_snapshot || quote.seller?.full_name || 'Administrador do Sistema'
+  const sellerPhone = quote.seller_phone_snapshot || quote.seller?.phone || organization.contact_phone || '(11) 99999-0000'
+  const sellerEmail = quote.seller?.email || organization.contact_email || 'admin@orcamentos.com'
 
-  // Dados da loja / administrador
+  // Dados da loja (2ª coluna)
   const emailDomain = organization.contact_email?.includes('@')
     ? organization.contact_email.split('@')[1]
     : null
@@ -49,7 +49,13 @@ export function QuotePrintableDoc({ quote, organization, previewMode = false }: 
   )
   const storeWebsite = !isGenericEmail && emailDomain
     ? `www.${emailDomain}`
-    : 'www.repalequipamentos.com.br'
+    : 'www.repalmarechal.com.br'
+
+  const storePhone = organization.contact_phone || '(41) 3333-3692'
+  const storeEmail = organization.contact_email || 'contato@repalmarechal.com.br'
+
+  // Endereço da loja (3ª coluna: Rua/número/bairro, Município/Estado, CEP)
+  const storeAddress = parseStoreAddress(organization.address)
 
   const brand = organization.brand_primary_color || '#1e40af'
   const secondary = organization.brand_secondary_color || '#3b82f6'
@@ -372,75 +378,99 @@ export function QuotePrintableDoc({ quote, organization, previewMode = false }: 
         {/* =========================================================================
             RODAPÉ OFICIAL SOBRE O TIMBRADO (REPAL 2)
             Posicionado exatamente sobre a faixa vermelha inferior
+            3 colunas equilibradas (3 linhas de dados cada):
+            1ª Vendedor: Nome / Telefone / Email
+            2ª Loja: Telefone / Site / Email
+            3ª Endereço loja: Rua, numero, bairro / Municipio,Estado / Cep
             ========================================================================= */}
         <footer
           className="timbrado-footer-overlay absolute bottom-0 left-0 w-[210mm] z-10 pointer-events-none flex items-center justify-center pb-[3mm]"
           style={{ height: '17.5mm' }}
         >
-          <div className="w-[180mm] mx-auto grid grid-cols-[1fr_1fr_1.1fr] gap-3 items-center text-white">
-            {/* Coluna 1: Vendedor (Nome, Telefone e E-mail caso possua) - Ajustado ao arco da onda esquerda */}
-            <div className="flex items-center gap-2.5 min-w-0 relative -top-[1.5mm]">
+          <div className="w-[182mm] mx-auto grid grid-cols-[1fr_1.05fr_1.2fr] gap-3 items-center text-white">
+            {/* 1ª coluna - Vendedor : Nome / Telefone / Email */}
+            <div className="flex items-center gap-2.5 min-w-0 relative -top-[1.2mm]">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-2xs">
                 <User className="h-4 w-4" />
               </div>
-              <div className="min-w-0">
-                <div className="font-extrabold truncate text-[11px] leading-tight tracking-tight">
-                  {sellerName || 'Vendedor REPAL'}
+              <div className="min-w-0 flex-1">
+                <div
+                  className="font-extrabold truncate text-[10.5px] leading-tight tracking-tight"
+                  title={sellerName}
+                >
+                  {sellerName}
                 </div>
-                {sellerPhone && (
-                  <div className="text-white/95 font-bold truncate text-[9.5px] leading-tight flex items-center gap-1 mt-0.5">
-                    <Phone className="h-2.5 w-2.5 shrink-0 opacity-90" />
-                    <span>{sellerPhone}</span>
-                  </div>
-                )}
-                {sellerEmail && (
-                  <div
-                    className="text-white/95 font-bold truncate text-[9px] leading-tight flex items-center gap-1 mt-0.5"
-                    title={sellerEmail}
-                  >
-                    <Mail className="h-2.5 w-2.5 shrink-0 opacity-90" />
-                    <span>{sellerEmail}</span>
-                  </div>
-                )}
+                <div
+                  className="text-white/95 font-bold truncate text-[9px] leading-tight flex items-center gap-1 mt-0.5"
+                  title={sellerPhone}
+                >
+                  <Phone className="h-2.5 w-2.5 shrink-0 opacity-90" />
+                  <span>{sellerPhone}</span>
+                </div>
+                <div
+                  className="text-white/95 font-bold truncate text-[8.5px] leading-tight flex items-center gap-1 mt-0.5"
+                  title={sellerEmail}
+                >
+                  <Mail className="h-2.5 w-2.5 shrink-0 opacity-90" />
+                  <span>{sellerEmail}</span>
+                </div>
               </div>
             </div>
 
-            {/* Coluna 2: Dados da Loja (Configuração do Administrador: Telefone e Site) */}
+            {/* 2ª coluna - Loja : Telefone / Site / Email */}
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-2xs">
                 <Globe className="h-4 w-4" />
               </div>
-              <div className="min-w-0">
-                <div className="font-extrabold truncate text-[11px] leading-tight tracking-tight">
-                  {organization.contact_phone ? `Loja: ${organization.contact_phone}` : 'Loja: (11) 3333-4444'}
+              <div className="min-w-0 flex-1">
+                <div
+                  className="font-extrabold truncate text-[10.5px] leading-tight tracking-tight flex items-center gap-1"
+                  title={`Loja: ${storePhone}`}
+                >
+                  <Phone className="h-2.5 w-2.5 shrink-0 opacity-90" />
+                  <span>Loja: {storePhone}</span>
                 </div>
-                <div className="text-white/95 font-bold truncate text-[10px] leading-tight mt-0.5">
-                  {storeWebsite}
+                <div
+                  className="text-white/95 font-bold truncate text-[9px] leading-tight flex items-center gap-1 mt-0.5"
+                  title={storeWebsite}
+                >
+                  <Globe className="h-2.5 w-2.5 shrink-0 opacity-90" />
+                  <span>{storeWebsite}</span>
+                </div>
+                <div
+                  className="text-white/95 font-bold truncate text-[8.5px] leading-tight flex items-center gap-1 mt-0.5"
+                  title={storeEmail}
+                >
+                  <Mail className="h-2.5 w-2.5 shrink-0 opacity-90" />
+                  <span>{storeEmail}</span>
                 </div>
               </div>
             </div>
 
-            {/* Coluna 3: Dados da Loja (Configuração do Administrador: Endereço e E-mail) */}
+            {/* 3ª coluna - Endereço loja : Rua, numero, bairro / Municipio,Estado / Cep */}
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-white shadow-2xs">
                 <MapPin className="h-4 w-4" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div
                   className="font-extrabold truncate text-[10.5px] leading-tight tracking-tight"
-                  title={organization.address || 'Endereço da loja'}
+                  title={storeAddress.street}
                 >
-                  {organization.address || 'Av. Mal. Floriano Peixoto, 1780 - Curitiba/PR'}
+                  {storeAddress.street}
                 </div>
-                {organization.contact_email && (
-                  <div
-                    className="text-white/95 font-bold truncate text-[10px] leading-tight flex items-center gap-1.5 mt-0.5"
-                    title={organization.contact_email}
-                  >
-                    <Mail className="h-3 w-3 shrink-0 opacity-90" />
-                    <span>{organization.contact_email}</span>
-                  </div>
-                )}
+                <div
+                  className="text-white/95 font-bold truncate text-[9px] leading-tight mt-0.5"
+                  title={storeAddress.cityState}
+                >
+                  {storeAddress.cityState}
+                </div>
+                <div
+                  className="text-white/90 font-bold truncate text-[8.5px] leading-tight mt-0.5"
+                  title={storeAddress.cep}
+                >
+                  {storeAddress.cep}
+                </div>
               </div>
             </div>
           </div>

@@ -248,17 +248,21 @@ export default function AdminSettingsPage() {
                 Endereço Institucional (impresso no rodapé)
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                <div className="absolute top-3 left-0 pl-3.5 flex items-start pointer-events-none text-zinc-500">
                   <MapPin className="h-4 w-4" />
                 </div>
-                <input
+                <textarea
                   id="org-address"
-                  type="text"
+                  rows={2}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
+                  placeholder="Rua, número, bairro&#10;Município, Estado&#10;CEP"
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none resize-none leading-relaxed"
                 />
               </div>
+              <p className="mt-1 text-[10.5px] text-zinc-500">
+                Pode ser preenchido em 3 linhas (1ª Rua, nº e bairro / 2ª Município e Estado / 3ª CEP) ou em linha única separada por vírgulas.
+              </p>
             </div>
 
             <div>

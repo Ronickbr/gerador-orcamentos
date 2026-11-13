@@ -100,3 +100,102 @@ export function quoteStatusLabel(status: QuoteStatus): string {
       return 'Expirado'
   }
 }
+
+export interface ParsedStoreAddress {
+  street: string
+  cityState: string
+  cep: string
+}
+
+export function parseStoreAddress(rawAddress: string | null | undefined): ParsedStoreAddress {
+  const defaultAddress: ParsedStoreAddress = {
+    street: 'Av. Mal. Floriano Peixoto, 1780 - Rebouças',
+    cityState: 'Curitiba, PR',
+    cep: 'CEP 80230-110',
+  }
+
+  if (!rawAddress || !rawAddress.trim()) {
+    return defaultAddress
+  }
+
+  const clean = rawAddress.trim()
+
+  // Caso 1: Usuário inseriu quebras de linha explicitamente
+  if (clean.includes('\n')) {
+    const lines = clean
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+    if (lines.length >= 3) {
+      return {
+        street: lines[0],
+        cityState: lines[1],
+        cep: lines[2].toUpperCase().startsWith('CEP') ? lines[2] : `CEP ${lines[2]}`,
+      }
+    }
+    if (lines.length === 2) {
+      return {
+        street: lines[0],
+        cityState: lines[1],
+        cep: defaultAddress.cep,
+      }
+    }
+    if (lines.length === 1) {
+      return parseSingleLineAddress(lines[0], defaultAddress)
+    }
+  }
+
+  return parseSingleLineAddress(clean, defaultAddress)
+}
+
+function parseSingleLineAddress(raw: string, defaultAddress: ParsedStoreAddress): ParsedStoreAddress {
+  let text = raw
+
+  // 1. Extrair CEP (ex: CEP 80230-110, 80230-110, 80230110)
+  let cep = ''
+  const cepRegex = /(?:CEP:?\s*)?(\b\d{5}[-.]?\d{3}\b)/i
+  const cepMatch = text.match(cepRegex)
+  if (cepMatch) {
+    const digits = cepMatch[1].replace(/\D/g, '')
+    if (digits.length === 8) {
+      cep = `CEP ${digits.substring(0, 5)}-${digits.substring(5)}`
+    } else {
+      cep = cepMatch[0].trim()
+    }
+    text = text.replace(cepMatch[0], ' ')
+  }
+
+  // 2. Extrair Município e Estado (ex: Curitiba - PR, Curitiba/PR, Curitiba, PR)
+  let cityState = ''
+  const ufs = 'AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO'
+  const cityStateRegex = new RegExp(
+    '(?:^|[,\\/\\-–—\\s]+)([A-Za-zÀ-ÿ\\s]{2,30}?)(?:\\s*[\\/\\-–—]\\s*|\\s*,\\s*)(' + ufs + ')\\b',
+    'i'
+  )
+
+  const csMatch = text.match(cityStateRegex)
+  if (csMatch) {
+    const city = csMatch[1].trim()
+    const uf = csMatch[2].toUpperCase().trim()
+    cityState = `${city}, ${uf}`
+    text = text.replace(csMatch[0], ' ')
+  }
+
+  // 3. Limpeza dos separadores remanescentes para rua, número e bairro
+  const street = text
+    .replace(/[–—]/g, '-')
+    .replace(/\s*,\s*,+/g, ',')
+    .replace(/\s*-\s*-+/g, '-')
+    .replace(/\s*,\s*-\s*/g, ' - ')
+    .replace(/\s+-\s*,\s*/g, ' - ')
+    .replace(/^[,\s-]+|[,\s-]+$/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  return {
+    street: street || defaultAddress.street,
+    cityState: cityState || defaultAddress.cityState,
+    cep: cep || defaultAddress.cep,
+  }
+}
+
