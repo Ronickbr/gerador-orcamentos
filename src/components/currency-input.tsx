@@ -53,7 +53,7 @@ export function CurrencyInput({
       placeholder={placeholder}
       required={required}
       className={cn(
-        'h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-50',
+        'h-10 w-full rounded-xl border border-zinc-800 bg-[#121215] px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-[#0072f5] focus:outline-none focus:ring-1 focus:ring-[#0072f5] disabled:cursor-not-allowed disabled:bg-zinc-900 disabled:opacity-50 transition-colors',
         className
       )}
     />

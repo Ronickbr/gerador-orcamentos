@@ -135,8 +135,8 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-16">
-        <div className="h-9 w-9 animate-spin rounded-full border-3 border-blue-600 border-t-transparent" />
-        <span className="mt-4 text-sm font-medium text-slate-500">Carregando perfil...</span>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0072f5] border-t-transparent" />
+        <span className="mt-4 text-xs font-medium text-zinc-400">Carregando perfil...</span>
       </div>
     )
   }
@@ -144,24 +144,22 @@ export default function ProfilePage() {
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-16">
-      {/* Cabeçalho */}
+    <div className="max-w-4xl mx-auto space-y-6 pb-20 select-none">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
             href="/orcamentos"
-            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 shadow-xs hover:bg-slate-50 transition-colors"
+            className="p-2 rounded-xl text-zinc-400 hover:text-white bg-[#18181b] border border-zinc-800 shadow-md hover:bg-zinc-800 transition-colors"
             title="Voltar aos orçamentos"
             aria-label="Voltar aos orçamentos"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-              Meu Perfil
-            </h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Atualize suas informações de vendedor e gerencie seu acesso
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Meu Perfil</h1>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Atualize seus dados profissionais e gerencie suas credenciais de acesso
             </p>
           </div>
         </div>
@@ -170,8 +168,8 @@ export default function ProfilePage() {
           <span
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
               isAdmin
-                ? 'bg-purple-50 text-purple-700 border-purple-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
+                ? 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+                : 'bg-blue-500/15 text-blue-400 border-blue-500/30'
             }`}
           >
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -180,10 +178,10 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Alerta de Sucesso */}
+      {/* Alerts */}
       {successMsg && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 flex items-start gap-3 animate-in fade-in duration-200">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="rounded-2xl border border-emerald-800/80 bg-emerald-950/60 p-4 text-xs text-emerald-200 flex items-start gap-3 backdrop-blur-sm">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
           <div>
             <span className="font-bold block">Sucesso!</span>
             <span>{successMsg}</span>
@@ -191,10 +189,9 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Alerta de Erro */}
       {errorMsg && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 flex items-start gap-3 animate-in fade-in duration-200">
-          <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+        <div className="rounded-2xl border border-red-800/80 bg-red-950/60 p-4 text-xs text-red-200 flex items-start gap-3 backdrop-blur-sm">
+          <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
           <div>
             <span className="font-bold block">Atenção</span>
             <span>{errorMsg}</span>
@@ -202,50 +199,46 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Card de Informação sobre Identificação nos Orçamentos */}
-      <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/50 p-4 sm:p-5 text-sm text-blue-900 flex items-start gap-3.5">
-        <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="space-y-1 text-xs sm:text-sm">
-          <p className="font-semibold text-blue-950">
+      {/* Info Notice Card */}
+      <div className="rounded-2xl border border-blue-900/50 bg-gradient-to-r from-blue-950/40 to-indigo-950/30 p-4 sm:p-5 text-xs text-blue-200 flex items-start gap-3.5">
+        <Info className="h-4 w-4 text-[#0072f5] shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-semibold text-white">
             Identificação em propostas e documentos comerciais
           </p>
-          <p className="text-blue-800 leading-relaxed">
-            Seu <strong>nome completo</strong> e <strong>telefone/WhatsApp</strong> aparecem nas propostas emitidas para os clientes e no cabeçalho do sistema.
-          </p>
-          <p className="text-blue-700 pt-1 text-xs border-t border-blue-200/60">
-            <strong>Regra de integridade:</strong> Orçamentos nunca são excluídos do sistema. Caso uma proposta seja descartada ou recusada pelo cliente, utilize o botão <em>Cancelar</em> para manter a rastreabilidade e histórico no banco de dados.
+          <p className="text-zinc-300 leading-relaxed">
+            Seu <strong>nome completo</strong> e <strong>telefone/WhatsApp</strong> aparecem no
+            cabeçalho das propostas comerciais emitidas para os clientes.
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Card 1: Dados Pessoais & Contato */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-5">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <User className="h-5 w-5 text-blue-600" />
-            <h2 className="text-base font-bold text-slate-900">Dados Pessoais</h2>
+        {/* Card 1: Dados Pessoais */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-5 sm:p-6 shadow-xl space-y-5">
+          <div className="flex items-center gap-2 pb-3 border-b border-zinc-800">
+            <User className="h-4 w-4 text-[#0072f5]" />
+            <h2 className="text-sm font-bold text-white">Dados Pessoais</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5"
               >
-                Nome Completo <span className="text-red-500">*</span>
+                Nome Completo <span className="text-rose-500">*</span>
               </label>
-              <div className="relative">
-                <input
-                  id="fullName"
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Seu nome completo"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <input
+                id="fullName"
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Seu nome completo"
+                className="w-full rounded-xl border border-zinc-800 bg-[#121215] px-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-[#0072f5] focus:outline-none"
+              />
+              <p className="text-[10px] text-zinc-500 mt-1">
                 Nome visível aos clientes nos orçamentos.
               </p>
             </div>
@@ -253,13 +246,13 @@ export default function ProfilePage() {
             <div>
               <label
                 htmlFor="phone"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5"
               >
                 Telefone / WhatsApp Comercial
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Phone className="h-4 w-4" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Phone className="h-3.5 w-3.5" />
                 </div>
                 <input
                   id="phone"
@@ -267,80 +260,74 @@ export default function ProfilePage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="(11) 98765-4321"
-                  className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] pl-10 pr-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Utilizado para contato direto do cliente.
-              </p>
+              <p className="text-[10px] text-zinc-500 mt-1">Contato direto com os clientes.</p>
             </div>
 
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5"
               >
                 E-mail de Acesso
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="h-4 w-4" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Mail className="h-3.5 w-3.5" />
                 </div>
                 <input
                   id="email"
                   type="email"
                   disabled
                   value={profile?.email || ''}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-500 cursor-not-allowed"
+                  className="w-full rounded-xl border border-zinc-800/60 bg-[#121215]/60 pl-10 pr-3.5 py-2.5 text-xs text-zinc-500 cursor-not-allowed"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Identificador único da sua conta de acesso.
-              </p>
+              <p className="text-[10px] text-zinc-500 mt-1">Identificador exclusivo da conta.</p>
             </div>
 
             <div>
               <label
                 htmlFor="company"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5"
               >
                 Empresa / Organização
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Building2 className="h-4 w-4" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Building2 className="h-3.5 w-3.5" />
                 </div>
                 <input
                   id="company"
                   type="text"
                   disabled
                   value={organization?.display_name || 'Organização'}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-500 cursor-not-allowed"
+                  className="w-full rounded-xl border border-zinc-800/60 bg-[#121215]/60 pl-10 pr-3.5 py-2.5 text-xs text-zinc-500 cursor-not-allowed"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Organização à qual você pertence no sistema.
-              </p>
+              <p className="text-[10px] text-zinc-500 mt-1">Organização vinculada.</p>
             </div>
           </div>
         </div>
 
         {/* Card 2: Segurança & Senha */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-xs space-y-5">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <KeyRound className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-base font-bold text-slate-900">Segurança & Senha</h2>
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-5 sm:p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-zinc-800">
+            <KeyRound className="h-4 w-4 text-purple-400" />
+            <h2 className="text-sm font-bold text-white">Segurança & Senha</h2>
           </div>
 
-          <p className="text-xs text-slate-500">
-            Preencha os campos abaixo apenas se desejar alterar sua senha de login. Caso queira manter a senha atual, deixe-os em branco.
+          <p className="text-xs text-zinc-400">
+            Deixe os campos abaixo em branco caso queira manter sua senha atual.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="newPassword"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5"
               >
                 Nova Senha
               </label>
@@ -351,14 +338,14 @@ export default function ProfilePage() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Mínimo de 8 caracteres"
                 autoComplete="new-password"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-zinc-800 bg-[#121215] px-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-[#0072f5] focus:outline-none"
               />
             </div>
 
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5"
+                className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5"
               >
                 Confirmar Nova Senha
               </label>
@@ -369,24 +356,24 @@ export default function ProfilePage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repita a nova senha"
                 autoComplete="new-password"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-zinc-800 bg-[#121215] px-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-[#0072f5] focus:outline-none"
               />
             </div>
           </div>
         </div>
 
-        {/* Botão de Salvar */}
+        {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <Link
             href="/orcamentos"
-            className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            className="px-4 py-2 rounded-xl border border-zinc-800 bg-[#18181b] text-xs font-semibold text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
           >
             Voltar
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0072f5] px-6 py-2.5 text-xs font-semibold text-white shadow-md shadow-blue-600/25 hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <Save className="h-4 w-4" />
             <span>{saving ? 'Salvando...' : 'Salvar Alterações'}</span>
@@ -396,4 +383,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-

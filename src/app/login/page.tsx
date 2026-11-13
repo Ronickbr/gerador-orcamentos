@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
-  Building2,
-  Lock,
-  Mail,
   AlertCircle,
   ArrowRight,
   Eye,
@@ -81,7 +79,6 @@ export default function LoginPage() {
       }
 
       // Sucesso: mantém o botão em "Entrando..." até a navegação concluir
-      // (sem reset de loading/pending, para não reabrir o formulário por um instante).
       router.replace('/orcamentos')
       router.refresh()
     } catch (err) {
@@ -130,7 +127,7 @@ export default function LoginPage() {
       return
     }
 
-    setSuccessMsg('Senha atualizada. Você será levado ao painel.')
+    setSuccessMsg('Senha atualizada com sucesso. Você será redirecionado...')
     setMode('login')
     setTimeout(() => {
       router.push('/orcamentos')
@@ -138,102 +135,115 @@ export default function LoginPage() {
     }, 1200)
   }
 
-  const title =
-    mode === 'forgot'
-      ? 'Recuperar Acesso'
-      : mode === 'reset'
-        ? 'Definir Nova Senha'
-        : 'Acesso ao Sistema'
-
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-b from-slate-50 via-slate-100/60 to-slate-200/50 p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 p-8 sm:p-10">
-          <div className="text-center mb-8">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
-              <Building2 className="h-7 w-7" />
-            </div>
-            <h1 className="mt-5 text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
-            <p className="mt-1.5 text-sm text-slate-500">
-              Gestão de propostas comerciais e emissão em papel timbrado
-            </p>
-          </div>
+    <div className="relative isolate grid min-h-screen grid-cols-[minmax(0,1fr)] place-items-center bg-[#0a0f1d] px-5 py-8 font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,Helvetica,Arial,sans-serif] leading-[normal] text-white scheme-dark before:absolute before:inset-0 before:-z-2 before:bg-[radial-gradient(55%_45%_at_85%_18%,rgba(168,85,247,0.18),transparent_60%),radial-gradient(50%_50%_at_15%_25%,rgba(244,63,94,0.12),transparent_60%),radial-gradient(65%_55%_at_50%_90%,rgba(14,165,233,0.18),transparent_65%),linear-gradient(160deg,#111827_0%,#080d1a_60%,#030712_100%)] after:absolute after:inset-0 after:-z-1 after:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.45)_100%)]">
+      <div className="w-full max-w-[410px] text-center">
+        {/* Brand / Logo */}
+        <div className="mb-6 flex flex-col items-center justify-center">
+          <Image
+            src="/Logo_mini_red.png"
+            alt="Logo"
+            width={60}
+            height={80}
+            className="h-16 w-auto object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
+            priority
+          />
+          <h1 className="mt-3 text-[1.25rem] font-bold tracking-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,.7)]">
+            Gerador de Orçamentos
+          </h1>
+        </div>
 
+        {/* Semantic Landmark: Main Card */}
+        <main className="rounded-[24px] border border-white/[0.08] bg-[#0c1322]/85 px-7 py-8 text-left shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+          {/* Header Texts */}
+          {mode === 'login' && (
+            <div className="mb-6">
+              <h2 className="text-[1.5rem] font-bold tracking-tight text-white">Bem-vindo de volta</h2>
+              <p className="mt-1 text-[.88rem] text-zinc-400">Acesse para continuar de onde parou.</p>
+            </div>
+          )}
+
+          {mode === 'forgot' && (
+            <div className="mb-6">
+              <h2 className="text-[1.5rem] font-bold tracking-tight text-white">Recuperar senha</h2>
+              <p className="mt-1 text-[.88rem] text-zinc-400">
+                Informe seu e-mail corporativo para receber o link de redefinição.
+              </p>
+            </div>
+          )}
+
+          {mode === 'reset' && (
+            <div className="mb-6">
+              <h2 className="text-[1.5rem] font-bold tracking-tight text-white">Definir nova senha</h2>
+              <p className="mt-1 text-[.88rem] text-zinc-400">Digite a nova senha de acesso à plataforma.</p>
+            </div>
+          )}
+
+          {/* Accessible Error Alert */}
           {errorMsg && (
-            <div role="alert" className="mb-6 flex items-start gap-3 rounded-xl bg-red-50/90 p-4 text-sm text-red-800 border border-red-200/80">
-              <AlertCircle className="h-5 w-5 shrink-0 text-red-600 mt-0.5" />
-              <div>
-                <span className="font-semibold block text-red-900">Não foi possível continuar</span>
-                <p className="text-xs leading-relaxed text-red-700">{errorMsg}</p>
+            <div
+              role="alert"
+              className="mb-5 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-950/60 p-3.5 text-sm text-red-200 backdrop-blur-sm"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+              <div className="flex-1">
+                <span className="block font-semibold text-red-100">Não foi possível continuar</span>
+                <p className="text-xs leading-relaxed text-red-300">{errorMsg}</p>
               </div>
             </div>
           )}
 
+          {/* Accessible Status Alert */}
           {successMsg && (
-            <div role="status" className="mb-6 flex items-start gap-3 rounded-xl bg-emerald-50/90 p-4 text-sm text-emerald-800 border border-emerald-200/80">
-              <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
-              <p className="text-xs leading-relaxed text-emerald-700">{successMsg}</p>
+            <div
+              role="status"
+              className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-950/60 p-3.5 text-sm text-emerald-200 backdrop-blur-sm"
+            >
+              <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+              <p className="text-xs leading-relaxed text-emerald-100">{successMsg}</p>
             </div>
           )}
 
+          {/* Mode: Login */}
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                <label className="mb-2 block text-xs font-semibold text-zinc-300" htmlFor="bmail">
                   E-mail corporativo
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    autoComplete="username"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="vendedor@empresa.com"
-                    className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
-                  />
-                </div>
+                <input
+                  className="w-full rounded-xl border border-[#233149] bg-[#141d2e] px-4 py-3 text-sm text-white placeholder:text-zinc-500 transition-all focus:border-blue-500 focus:bg-[#162238] focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  id="bmail"
+                  name="username"
+                  type="email"
+                  autoComplete="username"
+                  placeholder="vendedor@empresa.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    Senha de acesso
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('forgot')
-                      setErrorMsg(null)
-                      setSuccessMsg(null)
-                    }}
-                    className="text-xs font-semibold text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Esqueci a senha
-                  </button>
-                </div>
+                <label className="mb-2 block text-xs font-semibold text-zinc-300" htmlFor="bpw">
+                  Senha de acesso
+                </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-slate-400" />
-                  </div>
                   <input
-                    id="password"
+                    className="w-full rounded-xl border border-[#233149] bg-[#141d2e] px-4 py-3 pr-11 text-sm text-white placeholder:text-zinc-500 transition-all focus:border-blue-500 focus:bg-[#162238] focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                    id="bpw"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
-                    required
                     autoComplete="current-password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -241,115 +251,150 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between text-xs sm:text-sm pt-1 pb-1">
+                <label className="flex cursor-pointer items-center gap-2 font-medium text-zinc-300 select-none">
+                  <input
+                    className="h-4 w-4 rounded border-zinc-700 bg-[#141d2e] accent-white cursor-pointer"
+                    type="checkbox"
+                    name="remember"
+                  />
+                  <span>Lembrar-me</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('forgot')
+                    setErrorMsg(null)
+                    setSuccessMsg(null)
+                  }}
+                  className="font-bold text-white underline underline-offset-4 hover:text-zinc-200 transition-colors cursor-pointer bg-transparent border-0 p-0"
+                  aria-label="Forgot password? Recuperar senha"
+                >
+                  Esqueceu?
+                </button>
+              </div>
+
               <button
+                className="w-full cursor-pointer rounded-xl bg-white py-3.5 px-4 text-sm font-bold text-zinc-950 transition-all hover:bg-zinc-100 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-black/20"
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 px-4 text-sm font-semibold text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 {loading ? (
                   <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950 border-t-transparent" />
                     <span>Entrando...</span>
                   </>
                 ) : (
                   <>
                     <span>Acessar Painel</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 stroke-[2.5]" />
                   </>
                 )}
               </button>
             </form>
           )}
 
+          {/* Mode: Forgot Password */}
           {mode === 'forgot' && (
             <form onSubmit={handleForgot} className="space-y-4">
               <div>
-                <label htmlFor="forgot-email" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                  E-mail cadastrado
+                <label className="mb-2 block text-xs font-semibold text-zinc-300" htmlFor="forgot-email">
+                  E-mail corporativo cadastrado
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <input
-                    id="forgot-email"
-                    type="email"
-                    required
-                    autoComplete="username"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="vendedor@empresa.com"
-                    className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
-                  />
-                </div>
+                <input
+                  className="w-full rounded-xl border border-[#233149] bg-[#141d2e] px-4 py-3 text-sm text-white placeholder:text-zinc-500 transition-all focus:border-blue-500 focus:bg-[#162238] focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  id="forgot-email"
+                  name="username"
+                  type="email"
+                  autoComplete="username"
+                  placeholder="vendedor@empresa.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
 
               <button
+                className="w-full cursor-pointer rounded-xl bg-white py-3.5 px-4 text-sm font-bold text-zinc-950 transition-all hover:bg-zinc-100 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-black/20"
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 px-4 text-sm font-semibold text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
               >
-                {loading ? 'Enviando...' : 'Enviar link de redefinição'}
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950 border-t-transparent" />
+                    <span>Enviando link...</span>
+                  </>
+                ) : (
+                  'Enviar link de redefinição'
+                )}
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('login')
-                  setErrorMsg(null)
-                  setSuccessMsg(null)
-                }}
-                className="w-full text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
-              >
-                Voltar ao login
-              </button>
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('login')
+                    setErrorMsg(null)
+                    setSuccessMsg(null)
+                  }}
+                  className="text-xs font-medium text-zinc-400 hover:text-white underline underline-offset-4 cursor-pointer bg-transparent border-0"
+                >
+                  Voltar ao login
+                </button>
+              </div>
             </form>
           )}
 
+          {/* Mode: Reset Password */}
           {mode === 'reset' && (
             <form onSubmit={handleSetPassword} className="space-y-4">
               <div>
-                <label htmlFor="new-password" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                <label className="mb-2 block text-xs font-semibold text-zinc-300" htmlFor="reset-pw">
                   Nova senha (mínimo 8 caracteres)
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <input
-                    id="new-password"
-                    type="password"
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    value={resetPassword}
-                    onChange={(event) => setResetPassword(event.target.value)}
-                    className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
-                  />
-                </div>
+                <input
+                  className="w-full rounded-xl border border-[#233149] bg-[#141d2e] px-4 py-3 text-sm text-white placeholder:text-zinc-500 transition-all focus:border-blue-500 focus:bg-[#162238] focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                  id="reset-pw"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  placeholder="••••••••"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  required
+                />
               </div>
 
               <button
+                className="w-full cursor-pointer rounded-xl bg-white py-3.5 px-4 text-sm font-bold text-zinc-950 transition-all hover:bg-zinc-100 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-black/20"
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 px-4 text-sm font-semibold text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
               >
-                {loading ? 'Salvando...' : 'Salvar nova senha'}
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950 border-t-transparent" />
+                    <span>Salvando...</span>
+                  </>
+                ) : (
+                  'Salvar nova senha'
+                )}
               </button>
             </form>
           )}
 
-          <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-400">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span>Controle de permissão por organização</span>
+          {/* Security badge footer inside card */}
+          <div className="mt-6 border-t border-white/[0.08] pt-5 flex items-center justify-center gap-2 text-xs text-zinc-400">
+            <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+            <span>Ambiente seguro com permissão por organização</span>
           </div>
-        </div>
+        </main>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
+        {/* Outer footer description */}
+        <p className="mt-6 text-center text-xs leading-relaxed text-zinc-400 [text-shadow:0_1px_8px_rgba(0,0,0,.6)]">
           Sistema de Emissão e Padronização de Propostas Comerciais
         </p>
       </div>
     </div>
   )
 }
-

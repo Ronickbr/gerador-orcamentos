@@ -1,23 +1,23 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
-import { AppSidebar } from '@/components/app-sidebar'
+import { AuthenticatedShell } from '@/components/authenticated-shell'
 import { SignOutButton } from '@/components/sign-out-button'
 import { measureAsync } from '@/lib/perf'
 import type { Organization, Profile } from '@/types/database'
 
 function BlockedAccess({ title, message }: { title: string; message: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
-      <div className="max-w-md w-full bg-white rounded-2xl border border-amber-200 p-6 space-y-3">
-        <h1 className="text-lg font-bold text-slate-900">{title}</h1>
-        <p className="text-sm text-slate-600">{message}</p>
-        <p className="text-xs text-slate-500">
+    <div className="min-h-screen flex items-center justify-center bg-[#0e0e10] p-6 text-zinc-100">
+      <div className="max-w-md w-full bg-[#18181b] rounded-2xl border border-zinc-800 p-6 space-y-3 shadow-2xl">
+        <h1 className="text-lg font-bold text-white">{title}</h1>
+        <p className="text-sm text-zinc-400">{message}</p>
+        <p className="text-xs text-zinc-500">
           O provisionamento é feito por um administrador ativo da sua organização.
         </p>
         <div className="flex items-center gap-3 pt-2">
           <SignOutButton />
-          <Link href="/login" className="text-sm font-semibold text-blue-700 hover:underline">
+          <Link href="/login" className="text-sm font-semibold text-[#0072f5] hover:underline">
             Ir para o login
           </Link>
         </div>
@@ -109,13 +109,8 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 print:bg-white print:min-h-0 print:block">
-      <AppSidebar profile={profile} organization={organization} />
-      <div className="lg:pl-64 flex flex-col min-h-screen min-w-0 print:pl-0">
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 print:p-0 print:m-0 print:max-w-none print:w-full print:block">
-          {children}
-        </main>
-      </div>
-    </div>
+    <AuthenticatedShell profile={profile} organization={organization}>
+      {children}
+    </AuthenticatedShell>
   )
 }

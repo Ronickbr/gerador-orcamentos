@@ -4,6 +4,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Sistema de Orçamentos | Propostas Comerciais',
   description: 'Gerador profissional de orçamentos com papel timbrado e identificação do vendedor',
+  icons: {
+    icon: '/Logo_mini_red.png',
+  },
 }
 
 export default function RootLayout({

@@ -114,6 +114,8 @@ export interface QuoteMetrics {
   cancelled_count: number
   expired_count: number
   active_volume_cents: number
+  issued_volume_cents?: number
+  draft_volume_cents?: number
 }
 
 export interface AuditEvent {

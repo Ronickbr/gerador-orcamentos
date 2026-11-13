@@ -14,10 +14,8 @@ import {
   Clock,
   AlertTriangle,
   Copy,
-  ExternalLink,
   MessageSquare,
   CheckCircle2,
-  Lock,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -31,10 +29,10 @@ import { cancelQuote, issueQuote } from '@/app/(authenticated)/orcamentos/action
 import type { Organization, Quote, QuoteStatus } from '@/types/database'
 
 const STATUS_STYLES: Record<QuoteStatus, string> = {
-  draft: 'bg-slate-100 text-slate-700 border-slate-200',
-  issued: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  cancelled: 'bg-red-50 text-red-700 border-red-200',
-  expired: 'bg-amber-50 text-amber-700 border-amber-200',
+  draft: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  issued: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  cancelled: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+  expired: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
 }
 
 export default function QuoteDetailPage() {
@@ -100,7 +98,7 @@ export default function QuoteDetailPage() {
       await loadQuote(controller.signal)
     })()
     return () => controller.abort()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadQuote é estável por render e o efeito depende do id da rota
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quoteId, router, supabase])
 
   useEffect(() => {
@@ -146,11 +144,11 @@ export default function QuoteDetailPage() {
     setQuote((current) =>
       current
         ? {
-          ...current,
-          status: 'cancelled',
-          cancelled_at: new Date().toISOString(),
-          cancel_reason: cancelReason || null,
-        }
+            ...current,
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
+            cancel_reason: cancelReason || null,
+          }
         : current
     )
     router.refresh()
@@ -171,8 +169,8 @@ export default function QuoteDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-16">
-        <div className="h-9 w-9 animate-spin rounded-full border-3 border-blue-600 border-t-transparent" />
-        <span className="mt-4 text-sm font-medium text-slate-500">Carregando orçamento...</span>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0072f5] border-t-transparent" />
+        <span className="mt-4 text-xs font-medium text-zinc-400">Carregando orçamento...</span>
       </div>
     )
   }
@@ -180,10 +178,10 @@ export default function QuoteDetailPage() {
   if (errorMsg && !quote) {
     return (
       <div className="max-w-xl mx-auto space-y-4">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-6 text-xs text-zinc-300">
           {errorMsg}
         </div>
-        <Link href="/orcamentos" className="text-sm font-semibold text-blue-700 hover:underline">
+        <Link href="/orcamentos" className="text-xs font-semibold text-[#0072f5] hover:underline">
           Voltar à lista
         </Link>
       </div>
@@ -202,30 +200,31 @@ export default function QuoteDetailPage() {
   const rawCustomerPhone = quote.customer_phone?.replace(/\D/g, '')
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20 select-none">
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <Link
             href="/orcamentos"
-            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 shadow-xs hover:bg-slate-50 transition-colors"
+            className="p-2 rounded-xl text-zinc-400 hover:text-white bg-[#18181b] border border-zinc-800 shadow-md hover:bg-zinc-800 transition-colors"
             title="Voltar à lista"
             aria-label="Voltar à lista"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-mono">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-mono">
                 {quote.quote_number || 'Orçamento em Rascunho'}
               </h1>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border ${STATUS_STYLES[status]}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-semibold border ${STATUS_STYLES[status]}`}
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
                 {quoteStatusLabel(status)}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-zinc-400 mt-1">
               Criado em {formatDate(quote.created_at)}
               {quote.issued_at && ` • Emitido em ${formatDate(quote.issued_at)}`}
               {quote.valid_until && ` • Válido até ${formatDate(quote.valid_until)}`}
@@ -233,26 +232,27 @@ export default function QuoteDetailPage() {
           </div>
         </div>
 
+        {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handleCopyInternalLink}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
-            title="Copia o link interno. Quem abrir precisa estar logado."
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-[#18181b] px-3.5 py-2 text-xs font-semibold text-zinc-300 shadow-md hover:bg-zinc-800 hover:text-white active:scale-95 transition-all cursor-pointer"
+            title="Copia o link interno de impressão"
           >
             {copiedLink ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#17c964]" />
             ) : (
-              <Copy className="h-4 w-4 text-slate-400" />
+              <Copy className="h-3.5 w-3.5 text-zinc-400" />
             )}
-            <span>{copiedLink ? 'Link interno copiado' : 'Copiar link interno'}</span>
+            <span>{copiedLink ? 'Link copiado' : 'Copiar link'}</span>
           </button>
 
           <Link
             href={`/orcamentos/${quote.id}/imprimir`}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0072f5] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/25 hover:bg-blue-600 active:scale-95 transition-all"
           >
-            <Printer className="h-4 w-4" />
+            <Printer className="h-3.5 w-3.5" />
             <span>Imprimir / PDF</span>
           </Link>
 
@@ -260,17 +260,17 @@ export default function QuoteDetailPage() {
             <>
               <Link
                 href={`/orcamentos/${quote.id}/editar`}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-sm font-semibold text-amber-700 shadow-xs hover:bg-amber-50 active:scale-95 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all"
               >
-                <Pencil className="h-4 w-4 text-amber-600" />
+                <Pencil className="h-3.5 w-3.5" />
                 <span>Editar</span>
               </Link>
               <button
                 type="button"
                 onClick={() => setShowIssueModal(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#17c964] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-emerald-600/25 hover:bg-emerald-600 active:scale-95 transition-all cursor-pointer"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-3.5 w-3.5" />
                 <span>Emitir Oficialmente</span>
               </button>
             </>
@@ -280,40 +280,43 @@ export default function QuoteDetailPage() {
             <button
               type="button"
               onClick={() => setShowCancelModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 shadow-xs hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-950/60 bg-rose-950/20 px-3.5 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-950/40 active:scale-95 transition-all cursor-pointer"
             >
-              <XCircle className="h-4 w-4" />
-              <span>Cancelar Proposta</span>
+              <XCircle className="h-3.5 w-3.5" />
+              <span>Cancelar</span>
             </button>
           )}
         </div>
       </div>
 
+      {/* Alerts */}
       {errorMsg && (
-        <div role="alert" className="rounded-2xl bg-red-50 p-4 border border-red-200 text-sm text-red-800">
+        <div
+          role="alert"
+          className="rounded-2xl bg-red-950/60 p-4 border border-red-800/80 text-xs text-red-200 backdrop-blur-sm"
+        >
           {errorMsg}
         </div>
       )}
 
       {isExpired && (
-        <div className="bg-amber-50 rounded-2xl border border-amber-200/80 p-4 text-sm text-amber-900 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
+        <div className="bg-amber-950/50 rounded-2xl border border-amber-800/60 p-4 text-xs text-amber-200 flex items-start gap-3 backdrop-blur-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
           <div>
-            <span className="font-bold block">Validade expirada</span>
-            <p className="mt-0.5 text-xs">
-              A proposta passou da data de validade. Emita um novo orçamento ou combine nova
-              validade com o cliente.
+            <span className="font-bold block text-amber-100">Validade expirada</span>
+            <p className="mt-0.5 text-zinc-300">
+              A proposta passou da data de validade. Emita um novo orçamento ou combine nova validade.
             </p>
           </div>
         </div>
       )}
 
       {isCancelled && (
-        <div className="bg-red-50 rounded-2xl border border-red-200/80 p-4 text-sm text-red-800 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-red-600 mt-0.5" />
+        <div className="bg-rose-950/50 rounded-2xl border border-rose-800/60 p-4 text-xs text-rose-200 flex items-start gap-3 backdrop-blur-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
           <div>
-            <span className="font-bold block text-red-900">Orçamento cancelado</span>
-            <p className="mt-0.5 text-xs text-red-700">
+            <span className="font-bold block text-rose-100">Orçamento cancelado</span>
+            <p className="mt-0.5 text-zinc-300">
               {quote.cancel_reason
                 ? `Motivo registrado: "${quote.cancel_reason}"`
                 : 'Nenhum motivo informado no cancelamento.'}
@@ -323,10 +326,12 @@ export default function QuoteDetailPage() {
         </div>
       )}
 
+      {/* Customer & Seller Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        {/* Customer Card */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-5 shadow-xl space-y-3">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
               Dados do Cliente
             </span>
             {rawCustomerPhone && (
@@ -334,32 +339,34 @@ export default function QuoteDetailPage() {
                 href={`https://wa.me/55${rawCustomerPhone}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-semibold"
+                className="inline-flex items-center gap-1 text-xs text-[#17c964] hover:underline font-semibold"
               >
-                <MessageSquare className="h-3.5 w-3.5" />
+                <MessageSquare className="h-3 w-3" />
                 <span>WhatsApp</span>
               </a>
             )}
           </div>
 
           <div>
-            <h2 className="text-base font-bold text-slate-900">{quote.customer_name}</h2>
+            <h2 className="text-base font-bold text-white">{quote.customer_name}</h2>
             {quote.customer_tax_id && (
-              <div className="text-xs font-mono text-slate-500 mt-0.5">CPF/CNPJ: {quote.customer_tax_id}</div>
+              <div className="text-xs font-mono text-zinc-400 mt-0.5">
+                CPF/CNPJ: {quote.customer_tax_id}
+              </div>
             )}
           </div>
 
-          <div className="space-y-1.5 pt-1 text-xs text-slate-600">
+          <div className="space-y-1.5 pt-1 text-xs text-zinc-300">
             {quote.customer_phone && (
               <div className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 text-slate-400" />
+                <Phone className="h-3.5 w-3.5 text-zinc-500" />
                 <span>{quote.customer_phone}</span>
               </div>
             )}
             {quote.customer_email && (
               <div className="flex items-center gap-2">
-                <Mail className="h-3.5 w-3.5 text-slate-400" />
-                <a href={`mailto:${quote.customer_email}`} className="text-blue-600 hover:underline">
+                <Mail className="h-3.5 w-3.5 text-zinc-500" />
+                <a href={`mailto:${quote.customer_email}`} className="text-blue-400 hover:underline">
                   {quote.customer_email}
                 </a>
               </div>
@@ -367,124 +374,120 @@ export default function QuoteDetailPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        {/* Seller Card */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-5 shadow-xl space-y-3">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
               Emissor da Proposta
             </span>
-            <span className="text-xs font-semibold text-blue-600">
+            <span className="text-xs font-semibold text-[#0072f5]">
               {organization?.display_name ?? '—'}
             </span>
           </div>
 
           <div>
-            <h2 className="text-base font-bold text-slate-900">{sellerName ?? 'Não registrado'}</h2>
-            <div className="text-xs text-slate-500 mt-0.5">
-              {isDraft ? 'Vendedor responsável' : 'Vendedor congelado na emissão'}
+            <h2 className="text-base font-bold text-white">{sellerName ?? 'Não registrado'}</h2>
+            <div className="text-xs text-zinc-400 mt-0.5">
+              {isDraft ? 'Vendedor responsável' : 'Vendedor vinculado à proposta'}
             </div>
           </div>
 
-          <div className="space-y-1.5 pt-1 text-xs text-slate-600">
+          <div className="space-y-1.5 pt-1 text-xs text-zinc-300">
             {sellerPhone && (
               <div className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 text-slate-400" />
+                <Phone className="h-3.5 w-3.5 text-zinc-500" />
                 <span>{sellerPhone}</span>
               </div>
             )}
             {quote.valid_until && (
-              <div className="flex items-center gap-2 text-blue-700 font-medium">
-                <Clock className="h-3.5 w-3.5 text-blue-500" />
+              <div className="flex items-center gap-2 text-blue-400 font-medium">
+                <Clock className="h-3.5 w-3.5 text-[#0072f5]" />
                 <span>Validade: até {formatDate(quote.valid_until)}</span>
-              </div>
-            )}
-            {!sellerName && !sellerPhone && (
-              <div className="flex items-center gap-2 text-slate-400">
-                <Lock className="h-3.5 w-3.5" />
-                <span>Snapshot indisponível; documento sem contato direto.</span>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+      {/* Items Table Card */}
+      <div className="rounded-2xl border border-zinc-800 bg-[#18181b] shadow-xl overflow-hidden">
+        <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
             Composição do Orçamento
           </h2>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-zinc-500">
             {quote.items?.length ?? 0} {(quote.items?.length ?? 0) === 1 ? 'item' : 'itens'}
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50/80 text-[11px] uppercase font-bold tracking-wider text-slate-500 border-b border-slate-100">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#121215] text-[10px] uppercase font-bold tracking-wider text-zinc-400 border-b border-zinc-800">
               <tr>
-                <th scope="col" className="py-3 px-5 text-center w-12">#</th>
-                <th scope="col" className="py-3 px-5">Descrição</th>
-                <th scope="col" className="py-3 px-5 text-center">Qtd</th>
-                <th scope="col" className="py-3 px-5 text-center">Un</th>
-                <th scope="col" className="py-3 px-5 text-right">Valor Unitário</th>
-                <th scope="col" className="py-3 px-5 text-right">Total Linha</th>
+                <th scope="col" className="py-3 px-4 text-center w-10">#</th>
+                <th scope="col" className="py-3 px-4">Descrição</th>
+                <th scope="col" className="py-3 px-4 text-center">Qtd</th>
+                <th scope="col" className="py-3 px-4 text-center">Un</th>
+                <th scope="col" className="py-3 px-4 text-right">Valor Unitário</th>
+                <th scope="col" className="py-3 px-4 text-right">Total Linha</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-800/60">
               {(quote.items ?? []).length > 0 ? (
                 [...(quote.items ?? [])]
                   .sort((a, b) => a.position - b.position)
                   .map((item, index) => (
-                    <tr key={item.id ?? index} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-5 text-center text-xs font-bold text-slate-400">
+                    <tr key={item.id ?? index} className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="py-3 px-4 text-center text-xs font-bold text-zinc-500">
                         {item.position || index + 1}
                       </td>
-                      <td className="py-3.5 px-5 font-medium text-slate-900">{item.description}</td>
-                      <td className="py-3.5 px-5 text-center text-slate-700 font-mono text-xs">
+                      <td className="py-3 px-4 font-medium text-zinc-100">{item.description}</td>
+                      <td className="py-3 px-4 text-center text-zinc-300 font-mono">
                         {formatQuantity(item.quantity)}
                       </td>
-                      <td className="py-3.5 px-5 text-center text-slate-500 text-xs">{item.unit || 'un'}</td>
-                      <td className="py-3.5 px-5 text-right font-mono text-xs text-slate-600">
+                      <td className="py-3 px-4 text-center text-zinc-400">{item.unit || 'un'}</td>
+                      <td className="py-3 px-4 text-right font-mono text-zinc-400">
                         {formatCurrency(item.unit_price_cents)}
                       </td>
-                      <td className="py-3.5 px-5 text-right font-mono font-bold text-slate-900 text-sm">
+                      <td className="py-3 px-4 text-right font-mono font-bold text-zinc-100">
                         {formatCurrency(item.line_total_cents)}
                       </td>
                     </tr>
                   ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
+                  <td colSpan={6} className="py-6 text-center text-zinc-500">
                     Nenhum item adicionado a este orçamento.
                   </td>
                 </tr>
               )}
             </tbody>
-            <tfoot className="bg-slate-50/80 border-t border-slate-200">
+            <tfoot className="bg-[#121215] border-t border-zinc-800">
               {quote.discount_cents > 0 && (
                 <tr>
-                  <td colSpan={5} className="py-2 px-5 text-right text-xs text-slate-600">
+                  <td colSpan={5} className="py-2 px-4 text-right text-xs text-zinc-400">
                     Subtotal:
                   </td>
-                  <td className="py-2 px-5 text-right font-mono text-xs text-slate-700">
+                  <td className="py-2 px-4 text-right font-mono text-xs text-zinc-300">
                     {formatCurrency(quote.subtotal_cents)}
                   </td>
                 </tr>
               )}
               {quote.discount_cents > 0 && (
                 <tr>
-                  <td colSpan={5} className="py-2 px-5 text-right text-xs text-emerald-700">
+                  <td colSpan={5} className="py-2 px-4 text-right text-xs text-[#17c964]">
                     Desconto:
                   </td>
-                  <td className="py-2 px-5 text-right font-mono text-xs text-emerald-700">
+                  <td className="py-2 px-4 text-right font-mono text-xs text-[#17c964]">
                     − {formatCurrency(quote.discount_cents)}
                   </td>
                 </tr>
               )}
               <tr>
-                <td colSpan={5} className="py-4 px-5 text-right font-bold text-slate-700 text-sm uppercase tracking-wider">
+                <td colSpan={5} className="py-3 px-4 text-right font-bold text-zinc-300 uppercase tracking-wider text-xs">
                   Valor Total Geral:
                 </td>
-                <td className="py-4 px-5 text-right font-mono font-bold text-blue-700 text-lg sm:text-xl">
+                <td className="py-3 px-4 text-right font-mono font-extrabold text-[#0072f5] text-base sm:text-lg">
                   {formatCurrency(quote.total_cents)}
                 </td>
               </tr>
@@ -493,60 +496,56 @@ export default function QuoteDetailPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">
+      {/* Conditions and Notes Card */}
+      <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-6 shadow-xl space-y-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300 border-b border-zinc-800 pb-3">
           Condições Comerciais e Informações Adicionais
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
               Condições de Pagamento
             </span>
-            <p className="text-sm text-slate-800 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+            <p className="text-xs text-zinc-200 leading-relaxed bg-[#121215] p-3 rounded-xl border border-zinc-800/80">
               {quote.payment_terms || 'Não especificadas no orçamento.'}
             </p>
           </div>
 
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
               Observações Gerais & Prazos
             </span>
-            <p className="text-sm text-slate-800 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/60 whitespace-pre-wrap">
+            <p className="text-xs text-zinc-200 leading-relaxed bg-[#121215] p-3 rounded-xl border border-zinc-800/80 whitespace-pre-wrap">
               {quote.notes || 'Nenhuma observação adicional incluída.'}
             </p>
           </div>
         </div>
-
-        <p className="text-xs text-slate-400 flex items-start gap-1.5">
-          <ExternalLink className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-          A versão para impressão é interna: o link exige login e não expõe a proposta publicamente.
-        </p>
       </div>
 
+      {/* Modal Emitir */}
       {showIssueModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="issue-dialog-title"
-            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4"
+            className="bg-[#18181b] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-zinc-800 space-y-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 shrink-0">
-                <Send className="h-6 w-6" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-500/15 text-[#0072f5] shrink-0">
+                <Send className="h-5 w-5" />
               </div>
               <div>
-                <h3 id="issue-dialog-title" className="text-lg font-bold text-slate-900">
+                <h3 id="issue-dialog-title" className="text-base font-bold text-white">
                   Emitir Orçamento Oficial
                 </h3>
-                <p className="text-xs text-slate-500">{quote.customer_name}</p>
+                <p className="text-xs text-zinc-400">{quote.customer_name}</p>
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
-              A emissão reserva a numeração oficial e bloqueia a edição direta. Repetir a ação
-              devolve o mesmo número, sem duplicar.
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              A emissão reserva a numeração oficial e bloqueia a edição direta. O documento estará pronto para impressão e envio ao cliente.
             </p>
 
             <div className="flex items-center justify-end gap-3 pt-2">
@@ -554,8 +553,7 @@ export default function QuoteDetailPage() {
                 type="button"
                 onClick={() => setShowIssueModal(false)}
                 disabled={actionLoading}
-                autoFocus
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white rounded-xl transition-colors cursor-pointer"
               >
                 Voltar
               </button>
@@ -563,7 +561,7 @@ export default function QuoteDetailPage() {
                 type="button"
                 onClick={handleIssue}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#0072f5] hover:bg-blue-600 rounded-xl shadow-md shadow-blue-600/25 transition-colors cursor-pointer disabled:opacity-60"
               >
                 {actionLoading ? 'Emitindo...' : 'Confirmar e Imprimir'}
               </button>
@@ -572,43 +570,47 @@ export default function QuoteDetailPage() {
         </div>
       )}
 
+      {/* Modal Cancelar */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="cancel-dialog-title"
-            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4"
+            className="bg-[#18181b] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-zinc-800 space-y-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 shrink-0">
-                <AlertTriangle className="h-6 w-6" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-950/60 border border-rose-800/50 text-rose-400 shrink-0">
+                <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <h3 id="cancel-dialog-title" className="text-lg font-bold text-slate-900">
+                <h3 id="cancel-dialog-title" className="text-base font-bold text-white">
                   Cancelar Orçamento
                 </h3>
-                <p className="text-xs text-slate-500 font-mono">
+                <p className="text-xs text-zinc-400 font-mono">
                   {quote.quote_number || 'Orçamento em Rascunho'} — {quote.customer_name}
                 </p>
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Orçamentos não podem ser excluídos. Ao confirmar o cancelamento, este documento permanecerá registrado e arquivado no banco de dados com status <strong>Cancelado</strong> para integridade e histórico.
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Orçamentos não são excluídos. Ao confirmar, o orçamento permanecerá registrado no banco com status <strong>Cancelado</strong> para histórico e controle.
             </p>
 
             <div>
-              <label htmlFor="cancel-reason" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="cancel-reason"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 Motivo do cancelamento (opcional)
               </label>
               <textarea
                 id="cancel-reason"
                 value={cancelReason}
-                onChange={(event) => setCancelReason(event.target.value)}
-                placeholder="Ex: proposta recusada / erro na precificação"
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Ex: cliente recusou proposta..."
                 rows={3}
-                className="w-full rounded-xl border border-slate-300 p-3 text-sm placeholder:text-slate-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20"
+                className="w-full rounded-xl border border-zinc-800 bg-[#121215] p-3 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-rose-500 focus:outline-none"
               />
             </div>
 
@@ -617,8 +619,7 @@ export default function QuoteDetailPage() {
                 type="button"
                 onClick={() => setShowCancelModal(false)}
                 disabled={actionLoading}
-                autoFocus
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white rounded-xl transition-colors cursor-pointer"
               >
                 Voltar
               </button>
@@ -626,7 +627,7 @@ export default function QuoteDetailPage() {
                 type="button"
                 onClick={handleCancel}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-600/20 transition-colors cursor-pointer disabled:opacity-60"
               >
                 {actionLoading ? 'Cancelando...' : 'Confirmar Cancelamento'}
               </button>

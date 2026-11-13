@@ -5,6 +5,7 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { createClient, getAuthenticatedUser } from '@/lib/supabase/server'
 import { validateQuoteForm } from '@/lib/validation'
 import { logPerf } from '@/lib/perf'
+import { formatCurrency } from '@/lib/utils'
 import type {
   ActionResult,
   CancelQuoteResult,
@@ -387,6 +388,118 @@ export async function updateSeller(
   return { ok: true, data: result.profile }
 }
 
+export async function deleteSeller(profileId: string): Promise<ActionResult<{ id: string }>> {
+  const { supabase, user } = await requireUser()
+  if (!user) return fail('Sessão expirada. Entre novamente.')
+
+  if (profileId === user.id) {
+    return fail('Você não pode excluir seu próprio usuário.')
+  }
+
+  const { data: me } = await supabase
+    .from('profiles')
+    .select('id, organization_id, role, active')
+    .eq('id', user.id)
+    .single()
+
+  if (!me || me.role !== 'admin' || !me.active) {
+    return fail('Apenas administradores ativos podem excluir usuários.')
+  }
+
+  const { data: targetProfile, error: targetError } = await supabase
+    .from('profiles')
+    .select('id, organization_id, full_name, email')
+    .eq('id', profileId)
+    .single()
+
+  if (targetError || !targetProfile) {
+    return fail('Usuário não encontrado.')
+  }
+
+  if (targetProfile.organization_id !== me.organization_id) {
+    return fail('Usuário não pertence à sua organização.')
+  }
+
+  // Verificar se o usuário possui propostas/orçamentos vinculados
+  const { count: quotesCount, error: countError } = await supabase
+    .from('quotes')
+    .select('id', { count: 'exact', head: true })
+    .eq('seller_user_id', profileId)
+
+  if (countError) {
+    return fail(countError.message)
+  }
+
+  if (quotesCount && quotesCount > 0) {
+    return fail(
+      `Este usuário possui ${quotesCount} proposta(s) vinculada(s) e não pode ser excluído permanentemente para preservar o histórico comercial. Em vez disso, altere seu status para "Inativo".`
+    )
+  }
+
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!serviceKey || !supabaseUrl) {
+    return fail(
+      'A exclusão de usuário exige SUPABASE_SERVICE_ROLE_KEY configurada no servidor.'
+    )
+  }
+
+  const service = createServiceClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
+  // 1. Tenta via RPC se existir
+  let rpcSuccess = false
+  try {
+    const { data: rpcData, error: rpcError } = await supabase.rpc('admin_delete_seller', {
+      p_profile_id: profileId,
+    })
+    if (!rpcError && rpcData) {
+      rpcSuccess = true
+    }
+  } catch {
+    rpcSuccess = false
+  }
+
+  // 2. Se a RPC não foi executada/não existe, exclui via service client com privilégios de service_role
+  if (!rpcSuccess) {
+    const { error: deleteProfileError } = await service
+      .from('profiles')
+      .delete()
+      .eq('id', profileId)
+
+    if (deleteProfileError) {
+      return fail(deleteProfileError.message || 'Falha ao remover o perfil do usuário.')
+    }
+
+    // Registra evento de auditoria
+    await service.from('audit_events').insert({
+      organization_id: me.organization_id,
+      actor_user_id: me.id,
+      entity_type: 'user',
+      entity_id: profileId,
+      action: 'delete_user',
+      metadata: {
+        email: targetProfile.email,
+        full_name: targetProfile.full_name,
+      },
+    })
+  }
+
+  // 3. Remove também da autenticação do Supabase Auth
+  try {
+    const { error: authError } = await service.auth.admin.deleteUser(profileId)
+    if (authError) {
+      console.warn('Aviso ao remover usuário do Supabase Auth:', authError.message)
+    }
+  } catch (authErr) {
+    console.warn('Aviso: falha ao remover usuário do Supabase Auth:', authErr)
+  }
+
+  revalidatePath('/admin/vendedores')
+  return { ok: true, data: { id: profileId } }
+}
+
 export async function loadQuoteMetrics(): Promise<ActionResult<QuoteMetrics>> {
   const start = performance.now()
   const { supabase, user } = await requireUser()
@@ -465,16 +578,25 @@ export async function loadQuoteMetrics(): Promise<ActionResult<QuoteMetrics>> {
     let expired_count = 0
     let cancelled_count = 0
     let active_volume_cents = 0
+    let issued_volume_cents = 0
+    let draft_volume_cents = 0
 
     for (const q of quotes ?? []) {
       let st = q.status
       if (st === 'issued' && q.valid_until && new Date(q.valid_until) < now) {
         st = 'expired'
       }
-      if (st === 'issued') issued_count++
-      else if (st === 'draft') draft_count++
-      else if (st === 'expired') expired_count++
-      else if (st === 'cancelled') cancelled_count++
+      if (st === 'issued') {
+        issued_count++
+        issued_volume_cents += Number(q.total_cents) || 0
+      } else if (st === 'draft') {
+        draft_count++
+        draft_volume_cents += Number(q.total_cents) || 0
+      } else if (st === 'expired') {
+        expired_count++
+      } else if (st === 'cancelled') {
+        cancelled_count++
+      }
 
       if (st !== 'cancelled') {
         active_volume_cents += Number(q.total_cents) || 0
@@ -488,6 +610,8 @@ export async function loadQuoteMetrics(): Promise<ActionResult<QuoteMetrics>> {
       expired_count,
       cancelled_count,
       active_volume_cents,
+      issued_volume_cents,
+      draft_volume_cents,
     }
 
     // Grava no cache
@@ -502,4 +626,83 @@ export async function loadQuoteMetrics(): Promise<ActionResult<QuoteMetrics>> {
   } catch (err: unknown) {
     return fail(getErrorMessage(err) || 'Erro ao calcular métricas.')
   }
+}
+
+export interface MonthlyDataPoint {
+  label: string
+  issued: number
+  draft: number
+  issuedFormatted: string
+  draftFormatted: string
+}
+
+export async function loadMonthlyEvolution(): Promise<ActionResult<MonthlyDataPoint[]>> {
+  const { supabase, user } = await requireUser()
+  if (!user) return fail('Sessão expirada. Entre novamente.')
+
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('organization_id, role, active')
+    .eq('id', user.id)
+    .single()
+
+  if (!userProfile || !userProfile.active) return fail('Acesso negado.')
+
+  // Consulta propostas dos últimos 6 meses
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+  sixMonthsAgo.setDate(1)
+  sixMonthsAgo.setHours(0, 0, 0, 0)
+
+  let query = supabase
+    .from('quotes')
+    .select('created_at, status, total_cents, valid_until')
+    .eq('organization_id', userProfile.organization_id)
+    .gte('created_at', sixMonthsAgo.toISOString())
+    .order('created_at', { ascending: true })
+
+  if (userProfile.role !== 'admin') {
+    query = query.eq('seller_user_id', user.id)
+  }
+
+  const { data: quotes, error } = await query
+  if (error) return fail(error.message)
+
+  const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+  const now = new Date()
+  const monthlyBuckets: Map<string, { issued_cents: number; draft_cents: number; label: string }> = new Map()
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const label = monthNames[d.getMonth()]
+    monthlyBuckets.set(key, { issued_cents: 0, draft_cents: 0, label })
+  }
+
+  for (const q of quotes ?? []) {
+    const qDate = new Date(q.created_at)
+    const key = `${qDate.getFullYear()}-${String(qDate.getMonth() + 1).padStart(2, '0')}`
+    const bucket = monthlyBuckets.get(key)
+    if (bucket) {
+      const cents = Number(q.total_cents) || 0
+      if (q.status === 'issued') {
+        bucket.issued_cents += cents
+      } else if (q.status === 'draft') {
+        bucket.draft_cents += cents
+      }
+    }
+  }
+
+  const result: MonthlyDataPoint[] = []
+  for (const [, bucket] of monthlyBuckets) {
+    result.push({
+      label: bucket.label,
+      issued: Math.round(bucket.issued_cents / 10000),
+      draft: Math.round(bucket.draft_cents / 10000),
+      issuedFormatted: formatCurrency(bucket.issued_cents),
+      draftFormatted: formatCurrency(bucket.draft_cents),
+    })
+  }
+
+  return { ok: true, data: result }
 }

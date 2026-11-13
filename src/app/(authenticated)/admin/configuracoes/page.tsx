@@ -34,8 +34,8 @@ export default function AdminSettingsPage() {
   const [contactPhone, setContactPhone] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [address, setAddress] = useState('')
-  const [brandPrimaryColor, setBrandPrimaryColor] = useState('#1d4ed8')
-  const [brandSecondaryColor, setBrandSecondaryColor] = useState('#3b82f6')
+  const [brandPrimaryColor, setBrandPrimaryColor] = useState('#0072f5')
+  const [brandSecondaryColor, setBrandSecondaryColor] = useState('#17c964')
   const [quotePrefix, setQuotePrefix] = useState('ORC-')
   const [defaultValidityDays, setDefaultValidityDays] = useState('')
 
@@ -89,10 +89,12 @@ export default function AdminSettingsPage() {
       setContactPhone(typedOrg.contact_phone ?? '')
       setContactEmail(typedOrg.contact_email ?? '')
       setAddress(typedOrg.address ?? '')
-      setBrandPrimaryColor(typedOrg.brand_primary_color || '#1d4ed8')
-      setBrandSecondaryColor(typedOrg.brand_secondary_color || '#3b82f6')
+      setBrandPrimaryColor(typedOrg.brand_primary_color || '#0072f5')
+      setBrandSecondaryColor(typedOrg.brand_secondary_color || '#17c964')
       setQuotePrefix(typedOrg.quote_prefix || 'ORC-')
-      setDefaultValidityDays(typedOrg.default_validity_days ? String(typedOrg.default_validity_days) : '')
+      setDefaultValidityDays(
+        typedOrg.default_validity_days ? String(typedOrg.default_validity_days) : ''
+      )
       setLoading(false)
     })()
 
@@ -137,156 +139,179 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-16">
-        <div className="h-9 w-9 animate-spin rounded-full border-3 border-blue-600 border-t-transparent" />
-        <span className="mt-4 text-sm font-medium text-slate-500">Carregando configurações...</span>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0072f5] border-t-transparent" />
+        <span className="mt-4 text-xs font-medium text-zinc-400">Carregando configurações...</span>
       </div>
     )
   }
 
   if (!organization) {
     return (
-      <div className="max-w-xl mx-auto rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
+      <div className="max-w-xl mx-auto rounded-2xl border border-zinc-800 bg-[#18181b] p-6 text-xs text-zinc-300">
         {errorMsg ?? 'Organização indisponível.'}
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-24">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20 select-none">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
           Configurações da Empresa & Identidade Visual
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Dados oficiais, paleta e regras de emissão. Cada alteração incrementa a versão do template.
+        <p className="text-xs text-zinc-400 mt-1">
+          Dados cadastrais, cores e regras de prefixo aplicados às propostas comerciais.
         </p>
       </div>
 
       {successMsg && (
-        <div role="status" className="flex items-center gap-2.5 rounded-2xl bg-emerald-50 p-4 border border-emerald-200 text-sm text-emerald-800">
-          <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
+        <div
+          role="status"
+          className="flex items-center gap-2.5 rounded-2xl bg-emerald-950/60 p-4 border border-emerald-800/80 text-xs text-emerald-200 backdrop-blur-sm"
+        >
+          <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
           <span className="font-semibold">{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div role="alert" className="flex items-center gap-2.5 rounded-2xl bg-red-50 p-4 border border-red-200 text-sm text-red-800">
-          <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+        <div
+          role="alert"
+          className="flex items-center gap-2.5 rounded-2xl bg-red-950/60 p-4 border border-red-800/80 text-xs text-red-200 backdrop-blur-sm"
+        >
+          <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       <form onSubmit={handleSave} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+        {/* Section 1: Dados Cadastrais */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/15 text-[#0072f5]">
               <Building2 className="h-4 w-4" />
             </div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
               1. Identidade e Dados Cadastrais
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="org-display-name" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                Nome Comercial / Fantasia <span className="text-red-500">*</span>
+              <label
+                htmlFor="org-display-name"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
+                Nome Comercial / Fantasia <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Building2 className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Building2 className="h-4 w-4" />
                 </div>
                 <input
                   id="org-display-name"
                   type="text"
                   required
                   value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="org-legal-name" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="org-legal-name"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 Razão Social Oficial (opcional)
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <FileText className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <FileText className="h-4 w-4" />
                 </div>
                 <input
                   id="org-legal-name"
                   type="text"
                   value={legalName}
-                  onChange={(event) => setLegalName(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  onChange={(e) => setLegalName(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label htmlFor="org-address" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="org-address"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 Endereço Institucional (impresso no rodapé)
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <MapPin className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <MapPin className="h-4 w-4" />
                 </div>
                 <input
                   id="org-address"
                   type="text"
                   value={address}
-                  onChange={(event) => setAddress(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="org-phone" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="org-phone"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 Telefone Institucional
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Phone className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Phone className="h-4 w-4" />
                 </div>
                 <input
                   id="org-phone"
                   type="tel"
                   value={contactPhone}
-                  onChange={(event) => setContactPhone(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="org-email" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="org-email"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 E-mail Institucional
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Mail className="h-4 w-4" />
                 </div>
                 <input
                   id="org-email"
                   type="email"
                   value={contactEmail}
-                  onChange={(event) => setContactEmail(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
+        {/* Section 2: Cores da Marca */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500/15 text-purple-400">
               <Palette className="h-4 w-4" />
             </div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
               2. Cores da Marca & Pré-visualização
             </h2>
           </div>
@@ -294,7 +319,10 @@ export default function AdminSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label htmlFor="org-primary-color" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                <label
+                  htmlFor="org-primary-color"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+                >
                   Cor Primária
                 </label>
                 <div className="flex items-center gap-3">
@@ -302,21 +330,24 @@ export default function AdminSettingsPage() {
                     id="org-primary-color"
                     type="color"
                     value={brandPrimaryColor}
-                    onChange={(event) => setBrandPrimaryColor(event.target.value)}
-                    className="h-10 w-14 rounded-xl border border-slate-300 cursor-pointer p-0.5 bg-white"
+                    onChange={(e) => setBrandPrimaryColor(e.target.value)}
+                    className="h-10 w-14 rounded-xl border border-zinc-700 cursor-pointer p-0.5 bg-[#121215]"
                   />
                   <input
                     aria-label="Valor hexadecimal da cor primária"
                     type="text"
                     value={brandPrimaryColor}
-                    onChange={(event) => setBrandPrimaryColor(event.target.value)}
-                    className="w-36 rounded-xl border border-slate-300/80 py-2 px-3 text-sm font-mono text-slate-900 focus:border-blue-600 focus:outline-none uppercase"
+                    onChange={(e) => setBrandPrimaryColor(e.target.value)}
+                    className="w-36 rounded-xl border border-zinc-800 bg-[#121215] py-2 px-3 text-xs font-mono text-zinc-100 focus:border-[#0072f5] focus:outline-none uppercase"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="org-secondary-color" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                <label
+                  htmlFor="org-secondary-color"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+                >
                   Cor Secundária
                 </label>
                 <div className="flex items-center gap-3">
@@ -324,28 +355,34 @@ export default function AdminSettingsPage() {
                     id="org-secondary-color"
                     type="color"
                     value={brandSecondaryColor}
-                    onChange={(event) => setBrandSecondaryColor(event.target.value)}
-                    className="h-10 w-14 rounded-xl border border-slate-300 cursor-pointer p-0.5 bg-white"
+                    onChange={(e) => setBrandSecondaryColor(e.target.value)}
+                    className="h-10 w-14 rounded-xl border border-zinc-700 cursor-pointer p-0.5 bg-[#121215]"
                   />
                   <input
                     aria-label="Valor hexadecimal da cor secundária"
                     type="text"
                     value={brandSecondaryColor}
-                    onChange={(event) => setBrandSecondaryColor(event.target.value)}
-                    className="w-36 rounded-xl border border-slate-300/80 py-2 px-3 text-sm font-mono text-slate-900 focus:border-blue-600 focus:outline-none uppercase"
+                    onChange={(e) => setBrandSecondaryColor(e.target.value)}
+                    className="w-36 rounded-xl border border-zinc-800 bg-[#121215] py-2 px-3 text-xs font-mono text-zinc-100 focus:border-[#0072f5] focus:outline-none uppercase"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
-                Pré-visualização
+            {/* Preview Box */}
+            <div className="rounded-xl border border-zinc-800 bg-[#121215] p-4 space-y-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">
+                Pré-visualização do Timbrado
               </span>
               <div className="bg-white rounded-lg p-3 shadow-xs border border-slate-200 text-xs space-y-2">
-                <div className="h-2 rounded-full w-full" style={{ backgroundColor: brandPrimaryColor }} />
+                <div
+                  className="h-2 rounded-full w-full"
+                  style={{ backgroundColor: brandPrimaryColor }}
+                />
                 <div className="flex justify-between items-center pt-1">
-                  <span className="font-bold text-slate-800">{displayName || 'Nome da Empresa'}</span>
+                  <span className="font-bold text-slate-800">
+                    {displayName || 'Nome da Empresa'}
+                  </span>
                   <span
                     className="px-2 py-0.5 rounded text-[10px] font-bold text-white"
                     style={{ backgroundColor: brandPrimaryColor }}
@@ -364,24 +401,28 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+        {/* Section 3: Regras de Emissão */}
+        <div className="rounded-2xl border border-zinc-800 bg-[#18181b] p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-[#17c964]">
               <Hash className="h-4 w-4" />
             </div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
               3. Regras de Emissão & Validade
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="org-quote-prefix" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="org-quote-prefix"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 Prefixo do Código de Orçamento
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Hash className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Hash className="h-4 w-4" />
                 </div>
                 <input
                   id="org-quote-prefix"
@@ -389,22 +430,25 @@ export default function AdminSettingsPage() {
                   required
                   maxLength={12}
                   value={quotePrefix}
-                  onChange={(event) => setQuotePrefix(event.target.value.toUpperCase())}
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm font-mono text-slate-900 focus:border-blue-600 focus:outline-none"
+                  onChange={(e) => setQuotePrefix(e.target.value.toUpperCase())}
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs font-mono text-zinc-100 focus:border-[#0072f5] focus:outline-none uppercase"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[10px] text-zinc-500 mt-1">
                 Exemplo: <strong>{quotePrefix.replace(/-+$/, '') || 'ORC'}-1001</strong>
               </p>
             </div>
 
             <div>
-              <label htmlFor="org-validity" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label
+                htmlFor="org-validity"
+                className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5"
+              >
                 Validade Padrão Sugerida (dias)
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Calendar className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Calendar className="h-4 w-4" />
                 </div>
                 <input
                   id="org-validity"
@@ -412,23 +456,24 @@ export default function AdminSettingsPage() {
                   min="1"
                   max="365"
                   value={defaultValidityDays}
-                  onChange={(event) => setDefaultValidityDays(event.target.value)}
+                  onChange={(e) => setDefaultValidityDays(e.target.value)}
                   placeholder="Ex: 15"
-                  className="w-full rounded-xl border border-slate-300/80 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+                  className="w-full rounded-xl border border-zinc-800 bg-[#121215] py-2.5 pl-10 pr-3 text-xs text-zinc-100 focus:border-[#0072f5] focus:outline-none"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Aplicada só quando o orçamento não tiver validade própria.
+              <p className="text-[10px] text-zinc-500 mt-1">
+                Aplicada caso a proposta não tenha validade específica.
               </p>
             </div>
           </div>
         </div>
 
+        {/* Submit Button */}
         <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 py-3 px-6 text-sm font-semibold text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0072f5] py-2.5 px-6 text-xs font-semibold text-white shadow-md shadow-blue-600/25 hover:bg-blue-600 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
             <span>{saving ? 'Gravando alterações...' : 'Salvar Configurações'}</span>
